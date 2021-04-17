@@ -24,7 +24,6 @@ class App extends Component {
 		const web3 = window.web3;
 		const accounts = await web3.eth.getAccounts();
 		this.setState({ account: accounts[0] });
-		console.log('accounts', accounts);
 
 		const networkId = await web3.eth.net.getId();
 		const networkData = Color.networks[networkId];
@@ -35,6 +34,17 @@ class App extends Component {
 
 			const contract = new web3.eth.Contract(abi, address);
 			this.setState({ contract });
+
+			const totalSupply = await contract.methods.totalSupply().call();
+			this.setState({ totalSupply });
+
+			//load colors
+			for (let i = 1; i <= totalSupply; i++) {
+				const color = await contract.methods.colors(i - 1).call();
+				this.setState({
+					colors: [ ...this.state.colors, color ]
+				});
+			}
 		} else {
 			window.alert('Smart contract not deployed to detected network');
 		}
